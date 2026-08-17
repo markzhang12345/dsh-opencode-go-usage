@@ -1,5 +1,7 @@
 # dsh-opencode-go-usage
 
+[English](README.md) | [中文](README.zh.md)
+
 A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) web plugin that shows your **OpenCode Go** coding-plan usage as a live, number-only readout in the chat composer dock — `OpenCode Go  5h 39%  Weekly 15%  Monthly 13%` — refreshed every 60 seconds. It auto-enables only while the current default model provider is `opencode-go`, and hides otherwise.
 
 ## Features
