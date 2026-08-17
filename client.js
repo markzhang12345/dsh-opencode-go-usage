@@ -43,6 +43,17 @@ window.__ModuleLoader__.load({
       padding: "2px 0",
     };
 
+    const refreshStyle = {
+      cursor: "pointer",
+      border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.4))",
+      background: "transparent",
+      color: "inherit",
+      fontSize: "11px",
+      lineHeight: "1",
+      padding: "2px 5px",
+      borderRadius: "4px",
+    };
+
     function apply(ctx) {
       const mountReady = ctx.remote.$mount(TYPERT_REMOTE);
 
@@ -72,6 +83,18 @@ window.__ModuleLoader__.load({
         }
       }
 
+      // The per-session model directory store, or undefined when unavailable.
+      function sessionDirectoryStore(sessionId) {
+        const resolver = ctx.modelDirectories;
+        if (!resolver || typeof resolver.directoryFor !== "function") return undefined;
+        try {
+          const dir = resolver.directoryFor(sessionId);
+          return dir && dir.store ? dir.store : undefined;
+        } catch {
+          return undefined;
+        }
+      }
+
       function Dock(props) {
         const sessionId = props && props.sessionId;
         const [state, setState] = React.useState({ data: null });
@@ -93,9 +116,21 @@ window.__ModuleLoader__.load({
           return ctx.interval(load, REFRESH_MS);
         }, [load]);
 
+        // Immediate hook: the session's model directory refreshes its
+        // `current` selection whenever the provider/model changes (it listens
+        // to adapter/settings updates). Subscribing here means a provider
+        // switch re-runs `load` right away — flipping visibility and
+        // refetching usage immediately instead of waiting for the next poll.
+        const store = sessionDirectoryStore(sessionId);
+        React.useEffect(() => {
+          if (!store) return undefined;
+          return store.subscribe(load);
+        }, [store, load]);
+
         // Per-session provider gate: only render while THIS session is on
         // opencode-go. Re-evaluated on every render/poll so a model switch in
-        // this session flips it (up to the next 60s poll).
+        // this session flips it immediately (store subscription) or within
+        // the next 60s poll (safety net).
         if (sessionProvider(sessionId) !== TARGET_PROVIDER) return null;
 
         const d = state.data;
@@ -126,7 +161,12 @@ window.__ModuleLoader__.load({
 
         return React.createElement("div", { style: lineStyle, title: "OpenCode Go 用量（悬停见重置时间）" },
           React.createElement("span", null, "OpenCode Go"),
-          segments);
+          segments,
+          React.createElement("button", {
+            style: refreshStyle,
+            title: "刷新用量",
+            onClick: load,
+          }, "↻"));
       }
 
       ctx.slots.inject("conversation.composer.dock", () => ctx.slots.register({
