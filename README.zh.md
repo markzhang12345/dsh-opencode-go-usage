@@ -2,14 +2,13 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-一个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web 插件：在聊天输入栏下方的 Dock 栏常驻显示你 **OpenCode Go** 套餐的使用量 —— `OpenCode Go  5h 39%  Weekly 15%  Monthly 13%`，每 60 秒自动刷新。仅当当前默认模型供应商为 `opencode-go` 时启用，否则自动隐藏。
+一个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web 插件：在聊天输入栏下方的 Dock 栏常驻显示你 **OpenCode Go** 套餐的使用量 —— `OpenCode Go  5h 39%  Weekly 15%  Monthly 13%`，每 60 秒自动刷新。**按会话**自动启用：每个会话的 Dock 只在**该会话**的模型供应商为 `opencode-go` 时显示，否则自动隐藏。
 
 ## 功能
 
 - 聊天输入栏下方常驻读数（`conversation.composer.dock`）：5 小时滚动 / 每周 / 每月 的百分比，悬停显示重置时间
 - 每 60 秒自动刷新
-- 仅当当前模型供应商为 `opencode-go` 时自动启用，否则不显示
-- 也可在对话中直接询问："查一下 opencode go 用量"，即可获得数字
+- **按会话**自动启用：每个会话各自的 Dock 只在该会话模型供应商为 `opencode-go` 时显示（并发会话各自独立判断）
 - 纯数字显示，无进度条
 
 ## 安装
@@ -75,7 +74,7 @@ Authorization: Bearer <API_KEY>
 
 ## 原理
 
-双端插件。Host 端发布 `opencodeUsage` Typert Remote 服务；客户端 bundle 挂载它，并通过 `/api` RPC 载体渲染 Dock 栏读数。
+双端插件。Host 端发布 `opencodeUsage` Typert Remote 服务（它只负责解析 key 并拉取会话无关的用量数据）；客户端 bundle 挂载它，并通过 `/api` RPC 载体渲染 Dock 栏读数。**按会话的显隐在客户端判定**：每个 Dock 组件读取自己会话的模型目录（`ctx.modelDirectories`），仅当该会话的模型供应商为 `opencode-go` 时显示。
 
 | 文件 | 作用 |
 | --- | --- |

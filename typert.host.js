@@ -12,7 +12,6 @@ const windowSchema = z.object({
 
 const resultSchema = z.object({
   enabled: z.boolean(),
-  provider: z.string(),
   reason: z.string().nullable(),
   error: z.string().nullable(),
   usage: z.object({

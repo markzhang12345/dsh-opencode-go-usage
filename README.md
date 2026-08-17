@@ -2,14 +2,13 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) web plugin that shows your **OpenCode Go** coding-plan usage as a live, number-only readout in the chat composer dock — `OpenCode Go  5h 39%  Weekly 15%  Monthly 13%` — refreshed every 60 seconds. It auto-enables only while the current default model provider is `opencode-go`, and hides otherwise.
+A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) web plugin that shows your **OpenCode Go** coding-plan usage as a live, number-only readout in the chat composer dock — `OpenCode Go  5h 39%  Weekly 15%  Monthly 13%` — refreshed every 60 seconds. It auto-enables **per session**: each session's widget renders only while that session's model provider is `opencode-go`, and hides otherwise.
 
 ## Features
 
 - Live readout in the chat composer dock band (`conversation.composer.dock`): 5h rolling / weekly / monthly percentages with reset times on hover
 - Refreshes every 60s
-- Auto-enabled only when the current model provider is `opencode-go`
-- Also usable in conversation: ask "查一下 opencode go 用量" to get the numbers directly
+- Auto-enabled **per session**: each chat session's widget shows only when that session's model provider is `opencode-go` (independent across concurrent sessions)
 - No progress bars, plain numbers only
 
 ## Install
@@ -75,7 +74,7 @@ Authorization: Bearer <API_KEY>
 
 ## How it works
 
-A dual-face plugin. The host half publishes the `opencodeUsage` Typert Remote service; the client bundle mounts it and renders the dock readout over the `/api` RPC carrier.
+A dual-face plugin. The host half publishes the `opencodeUsage` Typert Remote service (it only resolves the key and fetches the session-agnostic usage data); the client bundle mounts it and renders the dock readout over the `/api` RPC carrier. Per-session visibility is decided on the client: each dock widget reads its own session's model directory (`ctx.modelDirectories`) and hides unless that session's provider is `opencode-go`.
 
 | File | Role |
 | --- | --- |
